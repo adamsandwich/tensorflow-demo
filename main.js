@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import "@babel/polyfill";
-import * as mobilenetModule from '@tensorflow-models/mobilenet';
+// import * as mobilenetModule from '@tensorflow-models/mobilenet';
+import * as mobilenetModule from "./mobilenet";
 import * as tf from '@tensorflow/tfjs';
 import * as knnClassifier from '@tensorflow-models/knn-classifier';
 import _ from "lodash";
