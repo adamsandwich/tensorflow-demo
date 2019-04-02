@@ -29,6 +29,21 @@ const TOPK = 10;
 
 class Main {
   constructor() {
+    const loadToast = document.createElement('div');
+    loadToast.style.height = '32px';
+    loadToast.style.width = '100%';
+    loadToast.style.backgroundColor = 'yellow';
+    loadToast.style.top = 0;
+    loadToast.style.left = 0;
+    loadToast.style.position = 'absolute';
+    loadToast.innerText = 'loading...';
+    loadToast.style.textAlign = 'center';
+    loadToast.style.lineHeight = '32px';
+    loadToast.style.boxShadow = '0 1px 6px rgba(0,0,0,.2)';
+    loadToast.style.borderColor = '#eee';
+    loadToast.style.transition='background-color 1s'
+    document.body.appendChild(loadToast);
+    this.toast = loadToast;
     // Initiate variables
     this.infoTexts = [];
     this.training = -1; // -1 when no class is being trained
@@ -132,20 +147,8 @@ class Main {
     }
     this.video.play();
     this.timer = requestAnimationFrame(this.animate.bind(this));
-
-    const loadToast = document.createElement('div');
-    loadToast.style.height = '32px';
-    loadToast.style.width = '100%';
-    loadToast.style.backgroundColor = 'green';
-    loadToast.style.top = 0;
-    loadToast.style.left = 0;
-    loadToast.style.position = 'absolute';
-    loadToast.innerText = 'loaded!';
-    loadToast.style.textAlign = 'center';
-    loadToast.style.lineHeight = '32px';
-    loadToast.style.boxShadow = '0 1px 6px rgba(0,0,0,.2)';
-    loadToast.style.borderColor = '#eee';
-    document.body.appendChild(loadToast);
+    this.toast.style.backgroundColor = 'green'
+    this.toast.innerText = 'loaded!';
   }
 
   stop() {
