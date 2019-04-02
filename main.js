@@ -20,7 +20,7 @@ import * as knnClassifier from '@tensorflow-models/knn-classifier';
 import _ from "lodash";
 
 // Number of classes to classify
-const NUM_CLASSES = 3;
+const NUM_CLASSES = 5;
 // Webcam Image size. Must be 227. 
 const IMAGE_SIZE = 227;
 // K value for KNN
@@ -35,6 +35,7 @@ class Main {
     this.videoPlaying = false;
     this.responseAudios = [];
     this.lastState = -1;
+    this.lastKey = '';
 
     // Initiate deeplearn.js math and knn classifier objects
     this.bindPage();
@@ -48,6 +49,7 @@ class Main {
     document.body.appendChild(this.video);
     //录音
     var rec = Recorder();
+    let exampleKey = ['Z', 'X', 'C', 'V', 'B'];
     // Create training buttons and info texts    
     for (let i = 0; i < NUM_CLASSES; i++) {
       const div = document.createElement('div');
@@ -56,14 +58,37 @@ class Main {
       div.style.display = 'flex';
       div.style.alignItems = 'center';
 
-      // Create training button
-      const button = document.createElement('button')
-      button.innerText = "Train " + i;
-      div.appendChild(button);
-
-      // Listen for mouse events when clicking the button
-      button.addEventListener('mousedown', () => this.training = i);
-      button.addEventListener('mouseup', () => this.training = -1);
+      // Listen for key events
+      document.body.addEventListener('keydown', (e) => {
+        let _self = this;
+        const key = _.upperCase(e.key);
+        let exampleNum = exampleKey.indexOf(key);
+        this.training = exampleNum;
+        if (key != this.lastKey) {
+          rec.open(function () { //打开麦克风授权获得相关资源
+              rec.start(); //开始录音
+              setTimeout(function () {
+                rec.stop(function (blob, duration) { //到达指定条件停止录音，拿到blob对象想干嘛就干嘛：立即播放、上传
+                  var blobUrl = URL.createObjectURL(blob);
+                  console.log(blobUrl, "时长:" + duration + "ms");
+                  rec.close(); //释放录音资源
+                  _self.responseAudios[exampleNum].src = blobUrl;
+                }, function (msg) {
+                  console.log("录音失败:" + msg);
+                });
+              }, 5000);
+            },
+            function (msg) { //未授权或不支持
+              console.log("无法录音:" + msg);
+            });
+        }
+        this.lastKey = key;
+      });
+      document.body.addEventListener('keyup', (e) => {
+        this.training = -1;
+        const key = _.upperCase(e.key);
+        this.lastKey = key;
+      });
 
       // Create info text
       const infoText = document.createElement('span')
@@ -71,38 +96,11 @@ class Main {
       div.appendChild(infoText);
       this.infoTexts.push(infoText);
 
-      //录音按钮
-      const recordButton = document.createElement('button')
-      recordButton.innerText = "Record " + i;
-      recordButton.style.marginLeft = '10px';
-      div.appendChild(recordButton);
       //播放声音
       const audio = document.createElement('audio');
       audio.controls = true;
       div.appendChild(audio);
       this.responseAudios.push(audio);
-
-      recordButton.addEventListener('mousedown', () => {
-        rec.open(function () { //打开麦克风授权获得相关资源
-            rec.start(); //开始录音
-
-            setTimeout(function () {
-              rec.stop(function (blob, duration) { //到达指定条件停止录音，拿到blob对象想干嘛就干嘛：立即播放、上传
-                var blobUrl = URL.createObjectURL(blob);
-                console.log(blobUrl, "时长:" + duration + "ms");
-                rec.close(); //释放录音资源
-                audio.src = blobUrl;
-              }, function (msg) {
-                console.log("录音失败:" + msg);
-              });
-            }, 3000);
-          },
-          function (msg) { //未授权或不支持
-            console.log("无法录音:" + msg);
-          });
-      });
-
-
     }
 
 
@@ -134,6 +132,20 @@ class Main {
     }
     this.video.play();
     this.timer = requestAnimationFrame(this.animate.bind(this));
+
+    const loadToast = document.createElement('div');
+    loadToast.style.height = '32px';
+    loadToast.style.width = '100%';
+    loadToast.style.backgroundColor = 'green';
+    loadToast.style.top = 0;
+    loadToast.style.left = 0;
+    loadToast.style.position = 'absolute';
+    loadToast.innerText = 'loaded!';
+    loadToast.style.textAlign = 'center';
+    loadToast.style.lineHeight = '32px';
+    loadToast.style.boxShadow = '0 1px 6px rgba(0,0,0,.2)';
+    loadToast.style.borderColor = '#eee';
+    document.body.appendChild(loadToast);
   }
 
   stop() {
@@ -179,7 +191,8 @@ class Main {
 
           // Update info text
           if (exampleCount[i] > 0) {
-            this.infoTexts[i].innerText = ` ${exampleCount[i]} examples - ${res.confidences[i] * 100}%`
+            this.infoTexts[i].innerText = ` ${exampleCount[i]} examples - ${res.confidences[i] * 100}%`;
+            console.log(res)
           }
         }
 
