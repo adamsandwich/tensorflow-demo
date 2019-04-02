@@ -41,7 +41,7 @@ class Main {
     loadToast.style.lineHeight = '32px';
     loadToast.style.boxShadow = '0 1px 6px rgba(0,0,0,.2)';
     loadToast.style.borderColor = '#eee';
-    loadToast.style.transition='background-color 1s'
+    loadToast.style.transition = 'background-color 1s'
     document.body.appendChild(loadToast);
     this.toast = loadToast;
     // Initiate variables
@@ -59,19 +59,24 @@ class Main {
     this.video = document.createElement('video');
     this.video.setAttribute('autoplay', '');
     this.video.setAttribute('playsinline', '');
-
+    const pannel = document.createElement('div');
+    pannel.style.display = 'flex';
+    pannel.style.flexDirection = 'column';
+    pannel.style.alignItems = 'center';
+    document.body.appendChild(pannel);
     // Add video element to DOM
-    document.body.appendChild(this.video);
+    pannel.appendChild(this.video);
     //录音
     var rec = Recorder();
     let exampleKey = ['Z', 'X', 'C', 'V', 'B'];
     // Create training buttons and info texts    
     for (let i = 0; i < NUM_CLASSES; i++) {
       const div = document.createElement('div');
-      document.body.appendChild(div);
+      pannel.appendChild(div);
       div.style.marginBottom = '10px';
       div.style.display = 'flex';
       div.style.alignItems = 'center';
+      div.style.width = '600px';
 
       // Listen for key events
       document.body.addEventListener('keydown', (e) => {
@@ -108,12 +113,14 @@ class Main {
       // Create info text
       const infoText = document.createElement('span')
       infoText.innerText = " No examples added";
+      infoText.style.flex = 1;
       div.appendChild(infoText);
       this.infoTexts.push(infoText);
 
       //播放声音
       const audio = document.createElement('audio');
       audio.controls = true;
+      audio.style.flex = 1;
       div.appendChild(audio);
       this.responseAudios.push(audio);
     }
