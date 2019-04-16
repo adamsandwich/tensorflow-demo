@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="js/recorder.js"></script>
+</head>
+
+<body>
+    <audio src="" id="audio"></audio>
+    <button id="start" onclick="start()">start</button>
+    <button id="stop" onclick="stop()">stop</button>
+    <script>
+        var recorder = new Recorder({
+            sampleRate: 44100, //采样频率，默认为44100Hz(标准MP3采样率)
+            bitRate: 128, //比特率，默认为128kbps(标准MP3质量)
+            success: function () { //成功回调函数
+            },
+            error: function (msg) { //失败回调函数
+                console.log(msg)
+            },
+            fix: function (msg) { //不支持H5录音回调函数
+                console.log(msg)
+
+            }
+        });
+
+        // //开始录音
+        // recorder.start();
+        //停止录音
+        // setTimeout(() => {
+        //     recorder.stop();
+        //     //获取MP3编码的Blob格式音频文件
+        //     recorder.getBlob(function (blob) { //获取成功回调函数，blob即为音频文件
+        //         //  ...
+        //         document.getElementById('audio').attributes('src',blob);
+        //     }, function (msg) { //获取失败回调函数，msg为错误信息
+        //         //  ...
+        //     });
+        // }, 3000);
+
+        function start() {
+            recorder.start();
+        }
+        function stop() {
+            recorder.stop();
+            //获取MP3编码的Blob格式音频文件
+            recorder.getBlob(function (blob) { //获取成功回调函数，blob即为音频文件
+                //  ...
+                document.getElementById('audio').attributes('src', blob);
+            }, function (msg) { //获取失败回调函数，msg为错误信息
+                //  ...
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -67,7 +67,19 @@ class Main {
     // Add video element to DOM
     pannel.appendChild(this.video);
     //录音
-    var rec = Recorder();
+    var recorder = new Recorder({
+      sampleRate: 44100, //采样频率，默认为44100Hz(标准MP3采样率)
+      bitRate: 128, //比特率，默认为128kbps(标准MP3质量)
+      success: function () { //成功回调函数
+        // start.disabled = false;
+      },
+      error: function (msg) { //失败回调函数
+        alert(msg);
+      },
+      fix: function (msg) { //不支持H5录音回调函数
+        alert(msg);
+      }
+    });
     let exampleKey = ['Z', 'X', 'C', 'V', 'B'];
     // Create training buttons and info texts    
     for (let i = 0; i < NUM_CLASSES; i++) {
@@ -85,22 +97,17 @@ class Main {
         let exampleNum = exampleKey.indexOf(key);
         this.training = exampleNum;
         if (key != this.lastKey) {
-          rec.open(function () { //打开麦克风授权获得相关资源
-              rec.start(); //开始录音
-              setTimeout(function () {
-                rec.stop(function (blob, duration) { //到达指定条件停止录音，拿到blob对象想干嘛就干嘛：立即播放、上传
-                  var blobUrl = URL.createObjectURL(blob);
-                  console.log(blobUrl, "时长:" + duration + "ms");
-                  rec.close(); //释放录音资源
-                  _self.responseAudios[exampleNum].src = blobUrl;
-                }, function (msg) {
-                  console.log("录音失败:" + msg);
-                });
-              }, 5000);
-            },
-            function (msg) { //未授权或不支持
-              console.log("无法录音:" + msg);
+          recorder.start();
+          setTimeout(function () {
+            recorder.stop();
+            //获取MP3编码的Blob格式音频文件
+            recorder.getBlob(function (blob) { //获取成功回调函数，blob即为音频文件
+              var blobUrl = URL.createObjectURL(blob);
+              _self.responseAudios[exampleNum].src = blobUrl;
+            }, function (msg) { //获取失败回调函数，msg为错误信息
+              //  ...
             });
+          }, 5000);
         }
         this.lastKey = key;
       });
@@ -128,9 +135,9 @@ class Main {
 
     // Setup webcam
     navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false
-      })
+      video: true,
+      audio: false
+    })
       .then((stream) => {
         this.video.srcObject = stream;
         this.video.width = IMAGE_SIZE;
